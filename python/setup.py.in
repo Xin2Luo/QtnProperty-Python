@@ -1,0 +1,51 @@
+# encoding : utf-8
+#Author : Xin Luo
+
+import os
+import argparse
+from setuptools import Extension, Command, setup
+from setuptools.command import build_ext
+
+
+if __name__ == "__main__":
+    build_type = os.path.basename(os.path.dirname(os.path.abspath(__file__)))
+    lib_suffix = "d" if build_type == "Debug" else ""
+
+    build_type = os.path.basename(os.path.dirname(os.path.abspath(__file__)))
+    lib_suffix = "d" if build_type == "Debug" else ""
+
+    class pre_build_ext(build_ext.build_ext):
+        def build_extension(self, ext):
+            import shutil
+            import os.path
+            import glob
+
+            build_pyd = self.get_ext_fullpath(ext.name)
+            os.makedirs(os.path.dirname(build_pyd), exist_ok=True)
+            shutil.copyfile(ext.name + ".pyd", build_pyd)
+
+
+    setup_cfgs = {
+            "version": "@QTN_VERSION@",
+            "description": "Python binding for QtnProperty library",
+            "author": "Xin Luo",
+            "author_email": "xin.luo@sigtrum.com",
+            }
+
+    #setup_cfgs["name"] = "pyqtn" + lib_suffix
+    #setup_cfgs["packages"] = ["pyqtn"]
+    #setup_cfgs["package_dir"] = {"pyqtn":"pyqtn"}
+    #setup_cfgs["package_data"] = {"pyqtn": ["QtnPropertyCore.dll", "QtnPropertyWidget.dll", "Qt5Script.dll","_qtnPropertyWidget.pyd"]}
+    #setup_cfgs["cmdclass"] = {"build_ext": pre_build_ext}
+    #setup_cfgs["ext_modules"] = [Extension("_qtnPropertyWidget", sources=[])]#,Extension("_qtnPropertyCore", sources=[])]
+
+    setup_cfgs["name"] = "pyqtn" + lib_suffix
+    setup_cfgs["packages"] = ["qtnProperty","pyqtn","pyqtn.core","pyqtn.widget"]
+    setup_cfgs["package_dir"] = {"qtnProperty": ".", "pyqtn":"pyqtn","pyqtn.core":"pyqtn/core","pyqtn.widget":"pyqtn/widget"}
+    setup_cfgs["package_data"] = {"qtnProperty": ["QtnPropertyCore.dll", "QtnPropertyWidget.dll", "Qt5Script.dll"]}
+    setup_cfgs["cmdclass"] = {"build_ext": pre_build_ext}
+    setup_cfgs["ext_modules"] = [Extension("_qtnPropertyWidget", sources=[]),Extension("_qtnPropertyCore", sources=[])]
+    setup(**setup_cfgs)
+
+
+
